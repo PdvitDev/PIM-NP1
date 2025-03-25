@@ -1,64 +1,7 @@
-import json
-import bcrypt
 import os
 import platform
 
-def armazenar_usuario(email, nome, senha, nome_arquivo="usuarios.json"):
-
-    try:
-        with open(nome_arquivo, "r") as arquivo:
-            usuarios = json.load(arquivo)
-
-    except FileNotFoundError:
-        usuarios = []
-
-    #Hash da senha
-    senha_criptografada = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt())
-
-    usuarios.append({
-        "email": email,
-        "nome": nome,
-        "senha": senha_criptografada.decode('utf-8') #armazena hash como string
-    })
-
-    with open(nome_arquivo, "w") as arquivo:
-        json.dump(usuarios, arquivo, indent=4) #indentação
-
-
-def ler_usuarios(nome_arquivo="usuarios.json"):
-
-    try:
-        with open(nome_arquivo, "r") as arquivo:
-            usuarios = json.load(arquivo)
-        return usuarios
-    
-
-    except FileNotFoundError:
-        return []
-
-def verificar_usuario(email, senha, nome_arquivo="usuarios.json"):
-    usuarios = ler_usuarios(nome_arquivo)
-
-    for usuario in usuarios:
-        if usuario["email"] == email:
-            senha_criptografada = usuario["senha"].encode('utf-8')
-            return bcrypt.checkpw(senha.encode('utf-8'), senha_criptografada), print("-----USUARIO LOGADO COM SUCESSO-----")
-        
-    return False # caso de usuario não encontrado
-
-def cadastro_usuario(arquivo_usuarios):
-    print("-----CADASTRO DE USUARIO-----")
-    email = input("Insira seu email:")
-    nome = input("Insira seu nome:")
-    senha = input("Insira sua senha:")
-    armazenar_usuario(email, nome, senha, arquivo_usuarios)
-
-def login_usuario():
-    print("------LOGIN USUARIO------")
-    email = input("Insira seu email:")
-    senha = input("Insira sua senha:")
-    verificar_usuario(email, senha)
-
+#apenas para estetica
 def limpar_terminal():
     sistema = platform.system()
 
@@ -68,16 +11,40 @@ def limpar_terminal():
     else:  # Linux ou macOS
         os.system('clear')
 
+def quiz(perguntas):
+    pontuacao = 0
+    #percorre o array
+    for pergunta in perguntas:
+        print(pergunta["pergunta"])
+
+        #percorre os dicts dentro do array
+        for i, alternativa in enumerate(pergunta["alternativas"]):
+            print(f"{i + 1}. {alternativa}")#formata as alternativas
+        resposta_usuario = int(input("Sua resposta (digite o numero): "))
+
+        if resposta_usuario == pergunta["resposta_correta"]:
+            limpar_terminal()
+            print("Resposta correta!")
+            pontuacao += 1
+        else:
+            limpar_terminal()
+            print("Resposta incorreta!")
+
+    print(f"Voce acertou {pontuacao} de {len(perguntas)} perguntas!")
 
 def main():
-    arquivo_usuarios = "usuarios.json"
+    #array onde dentro de cada index tem um dict
+    perguntas = [{
+        "pergunta" : "Qual operador lógico em Python é usado para negar uma condição?",
+        "alternativas" :["and", "or", "not"],
+        "resposta_correta": 3,
+    },
+    {
+        "pergunta" : "Qual das seguintes estruturas de controle de fluxo é usada para repetir um bloco de código várias vezes em Python?",
+        "alternativas" :["if", "for", "else"],
+        "resposta_correta": 2,
+    },
+    ]
 
-    cadastro_usuario(arquivo_usuarios)
-
-    limpar_terminal()
-
-    login_usuario()
-
-
-
+    quiz(perguntas)
 main()
